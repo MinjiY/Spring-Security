@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.filter.CorsFilter;
 
@@ -51,39 +53,65 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // token을 사용하는 방식이기 때문에 csrf를 disable합니다.
-                .csrf(csrf -> csrf.disable())
-
-                //.addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
+        http.csrf().disable();
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.authorizeRequests()
+                .antMatchers("/api/**").permitAll()
+                .antMatchers("/auth/**").permitAll()
+                .antMatchers("/**").permitAll()
+                .anyRequest().authenticated();
+        http.exceptionHandling(exceptionHandling -> exceptionHandling
                         .accessDeniedHandler(jwtAccessDeniedHandler)
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                )
-
-                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        //.requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
-                        .antMatchers("/api/hello").permitAll()
-                        .antMatchers("/api/authenticate").permitAll()
-                        .antMatchers("/api/signup").permitAll()
-                        //.requestMatchers()
-                        //.requestMatchers(PathRequest.toH2Console()).permitAll()
-                        .anyRequest().authenticated()
-                )
-
-                // 세션을 사용하지 않기 때문에 STATELESS로 설정
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                // enable h2-console
-//                .headers(headers ->
-//                        headers.frameOptions(options ->
-//                                options.sameOrigin()
-//                        )
-//                )
-
-                .apply(new JwtSecurityConfig(tokenProvider));
+                );
+        http.apply(new JwtSecurityConfig(tokenProvider));
         return http.build();
+//        http
+//                // token을 사용하는 방식이기 때문에 csrf를 disable합니다.
+//                //.csrf(csrf -> csrf.disable())
+//                .csrf()
+//                .disable()
+//
+//                //.addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+//                .exceptionHandling(exceptionHandling -> exceptionHandling
+//                        .accessDeniedHandler(jwtAccessDeniedHandler)
+//                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+//                )
+//
+//                // 세션을 사용하지 않기 때문에 STATELESS로 설정
+//                .sessionManagement(sessionManagement ->
+//                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                )
+////                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+////                        //.requestMatchers("/api/hello", "/api/authenticate", "/api/signup").permitAll()
+////                        //.requestMatchers(HttpMethod.POST, "/api/hello").permitAll()
+////                        .antMatchers("/api/hello").permitAll()
+////                        .antMatchers("/api/authenticate").permitAll()
+////                        .antMatchers("/api/signup").permitAll()
+////                        .antMatchers("/api/**").permitAll()
+////                        .antMatchers("/**").permitAll()
+////                        //.antMatchers("/api/signup").permitAll()
+////                        //.requestMatchers()
+////                        //.requestMatchers(PathRequest.toH2Console()).permitAll()
+////                        .anyRequest().authenticated() // 이외의 모든 요청은 인증된 사용자만 접근 가능
+////                )
+//                .authorizeHttpRequests()
+//                //.antMatchers("/api/hello").permitAll()
+//                //.antMatchers("/api/authenticate").permitAll()
+//                .antMatchers("/api/signup").permitAll()
+//                .antMatchers("/api/**").permitAll()
+//                .antMatchers("/**").permitAll()
+//                .anyRequest().authenticated()
+//                .and()
+//
+//                // enable h2-console
+////                .headers(headers ->
+////                        headers.frameOptions(options ->
+////                                options.sameOrigin()
+////                        )
+////                )
+//
+//                .apply(new JwtSecurityConfig(tokenProvider));
+//        return http.build();
     }
 }
