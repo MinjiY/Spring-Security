@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class indexController {
 
-    @GetMapping("/test")
+    @GetMapping("/hello")
     public ResponseEntity<String> index(){
-        return ResponseEntity.ok("index");
+        return ResponseEntity.ok("hello");
     }
 }

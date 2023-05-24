@@ -3,7 +3,8 @@ package com.security.jwt;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = {"org.springframework.web.filter.CorsFilter"})
+@SpringBootApplication
+//@SpringBootApplication(scanBasePackages = {"org.springframework.web.filter.CorsFilter"})
 public class JwtApplication {
 
     public static void main(String[] args) {
